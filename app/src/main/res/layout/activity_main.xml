@@ -8,13 +8,24 @@
     >
 
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:background="#AE0000"
+        android:scaleType="centerInside"
+        android:text="目前無網路連線"
+        android:textColor="#FFFFFF"
+        android:visibility="visible" />
+
     <SearchView
         android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp"
-        android:hint="@string/search_hint" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView">
+
+    </SearchView>
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -1,7 +1,16 @@
 package com.bang.linetvdemo;
 
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.bang.linetvdemo.app.AppConfig;
 
@@ -34,17 +44,19 @@ public class MainActivity extends AppCompatActivity {
     private ListAdapter adapter;
     private List<Drama> list= new ArrayList<Drama>();
     private ListView lv;
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        requestSTORAGEPermission();
         lv = (ListView) findViewById(R.id.listView);
         searchView = (SearchView) findViewById(R.id.searchView);
         lv.setTextFilterEnabled(true);
         setSearch_function();
-
+        preferences = getSharedPreferences("dramaInfo",MODE_PRIVATE);
 
     }
 
@@ -54,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                new ReadJSON().execute(AppConfig.URL_GETDRAMAS); // listview資訊
+                new ReadJSON().execute(AppConfig.URL_GETDRAMAS);
             }
         });
 
@@ -74,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         });
+
     }
 
     private void setSearch_function() {
@@ -85,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                preferences.edit().putString("searchState",newText).commit();
                 adapter.resetData();
                 adapter.getFilter().filter(newText);
                 return true;
@@ -125,33 +139,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String content) {
-            try {
-
-                JSONObject jObj = new JSONObject(content);
-                String data = jObj.getString("data");
-                JSONArray array = new JSONArray(data);
-                for (int i = 0; i < array.length(); i++) {
-                    JSONObject jsonObject = array.getJSONObject(i);
-                    list.add(new Drama(
-                            jsonObject.getString("drama_id"),
-                            jsonObject.getString("name"),
-                            jsonObject.getString("total_views")+"次",
-                            jsonObject.getString("created_at"),
-                            jsonObject.getString("thumb"),
-                            jsonObject.getString("rating")+"分"
-                    ));
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            adapter = new ListAdapter(list, getApplicationContext());
-            lv.setAdapter(adapter);
+            handlejson(content);
         }
     }
 
 
-    private static String readURL(String theUrl) {
+    private String readURL(String theUrl) {
         StringBuffer content = new StringBuffer();
 
         try {
@@ -170,10 +163,86 @@ public class MainActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
+            disconnect();
             e.printStackTrace();
         }
         return content.toString();
 
 
+    }
+
+    private void disconnect(){
+        String strJson = preferences.getString("jsondata","");
+
+        if (strJson != null) {
+            handlejson(strJson);
+        }
+    }
+
+    private void handlejson(String strJson){
+        try {
+        JSONObject jObj = new JSONObject(strJson);
+        String data = jObj.getString("data");
+        JSONArray array = new JSONArray(data);
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject jsonObject = array.getJSONObject(i);
+            list.add(new Drama(
+                    jsonObject.getString("drama_id"),
+                    jsonObject.getString("name"),
+                    jsonObject.getString("total_views")+"次",
+                    jsonObject.getString("created_at"),
+                    jsonObject.getString("thumb"),
+                    jsonObject.getString("rating")+"分"
+            ));
+
+        }
+        if(isConnected()){
+            preferences.edit().putString("jsondata",jObj.toString()).commit();
+        }else{
+
+        }
+
+
+    } catch (JSONException e) {
+            e.printStackTrace();
+    }
+        adapter = new ListAdapter(list, getApplicationContext());
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                lv.setAdapter(adapter);
+                searchView.setQueryHint(getString(R.string.search_hint));
+                if(!preferences.getString("searchState", "").equals("")) {
+                    String str = preferences.getString("searchState", "");
+                    searchView.onActionViewExpanded();
+                    searchView.setQuery(str,false);
+                }
+            }
+        });
+    }
+
+    public boolean isConnected(){
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+
+        if ( networkInfo != null && networkInfo.isAvailable()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    private void requestSTORAGEPermission() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            String permissionEXTERNAL = android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+            int hasPermissionEXTERNAL = checkSelfPermission(
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+            if (hasPermissionEXTERNAL != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{permissionEXTERNAL}, 1);
+            }
+        }
     }
 }

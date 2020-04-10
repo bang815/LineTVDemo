@@ -24,7 +24,6 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
     private Filter dramaFilter;
 
     public ListAdapter(List<Drama> dramas, Context context){
-        //super(context ,resource ,dramas);
         super(context, R.layout.list_layout, dramas);
         this.dramas=dramas;
         this.context = context;
@@ -91,9 +90,9 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
 
 
     public Filter getFilter() {
-        if (dramaFilter == null)
+        if (dramaFilter == null){
             dramaFilter = new DramaFilter();
-
+        }
         return dramaFilter;
     }
 
