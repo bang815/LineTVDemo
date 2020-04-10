@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.bang.linetvdemo.DramaDetailsActivity"
+    >
+
+    <ImageView
+        android:id="@+id/imageThumbDetails"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="23dp"
+        android:scaleType="fitCenter" />
+
+    <TextView
+        android:id="@+id/textViewDetailsName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/imageThumbDetails"
+        android:layout_marginLeft="49dp"
+        android:layout_marginStart="49dp"
+        android:layout_marginTop="25dp"
+        android:text="@string/drama_name"
+        android:textSize="25dp"/>
+
+    <TextView
+        android:id="@+id/textViewDetailsRating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textViewDetailsName"
+        android:layout_alignStart="@+id/textViewDetailsName"
+        android:layout_below="@+id/textViewDetailsName"
+        android:layout_marginTop="20dp"
+        android:text="@string/drama_rating"
+        android:textSize="25dp"/>
+
+    <TextView
+        android:id="@+id/Name_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textViewDetailsRating"
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
+        android:layout_toEndOf="@+id/textViewDetailsName"
+        android:layout_toRightOf="@+id/textViewDetailsName"
+        android:textSize="25dp" />
+
+    <TextView
+        android:id="@+id/Rating_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textViewDetailsCreated_at"
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
+        android:layout_toEndOf="@+id/textViewDetailsRating"
+        android:layout_toRightOf="@+id/textViewDetailsRating"
+        android:textSize="25dp" />
+
+    <TextView
+    android:id="@+id/textViewDetailsCreated_at"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="25dp"
+    android:text="@string/drama_created_at"
+    android:textSize="25dp"
+    android:layout_below="@+id/textViewDetailsRating"
+    android:layout_alignLeft="@+id/textViewDetailsRating"
+    android:layout_alignStart="@+id/textViewDetailsRating" />
+
+    <TextView
+        android:id="@+id/Created_at_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="11dp"
+        android:textSize="25dp"
+        android:layout_alignTop="@+id/textViewDetailsCreated_at"
+        android:layout_toEndOf="@+id/textViewDetailsCreated_at"
+        android:layout_toRightOf="@+id/textViewDetailsCreated_at" />
+    <TextView
+        android:id="@+id/textViewDetailsTotal_views"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="@string/drama_total_views"
+        android:textSize="25dp"
+        android:layout_below="@+id/textViewDetailsCreated_at"
+        android:layout_alignLeft="@+id/textViewDetailsCreated_at"
+        android:layout_alignStart="@+id/textViewDetailsCreated_at" />
+
+    <TextView
+        android:id="@+id/Total_views_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="11dp"
+        android:textSize="25dp"
+        android:layout_alignTop="@+id/textViewDetailsTotal_views"
+        android:layout_toEndOf="@+id/textViewDetailsTotal_views"
+        android:layout_toRightOf="@+id/textViewDetailsTotal_views" />
+
+</RelativeLayout>
