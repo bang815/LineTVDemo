@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -11,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.SearchView;
 
 import com.bang.linetvdemo.app.AppConfig;
 
@@ -24,22 +26,26 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText search_edt;
-    private ImageButton search_btn;
-    ArrayList<Drama> arrayList;
-    ListView lv;
+    private SearchView searchView;
+    private ListAdapter adapter;
+    private List<Drama> list= new ArrayList<Drama>();
+    private ListView lv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        arrayList = new ArrayList<>();
         lv = (ListView) findViewById(R.id.listView);
-        search_edt = (EditText) findViewById(R.id.search_edt);
+        searchView = (SearchView) findViewById(R.id.searchView);
+        lv.setTextFilterEnabled(true);
+        setSearch_function();
+
+
     }
 
     @Override
@@ -56,16 +62,35 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent i = new Intent(MainActivity.this,DramaDetailsActivity.class);
-                i.putExtra("Drama_Thumb",arrayList.get(position).getThumb());
-                i.putExtra("Drama_Name",arrayList.get(position).getName());
-                i.putExtra("Drama_Rating",arrayList.get(position).getRating());
-                i.putExtra("Drama_Created_at",arrayList.get(position).getCreated_at());
-                i.putExtra("Drama_Total_views",arrayList.get(position).getTotal_views());
+                i.putExtra("Drama_Thumb",adapter.getItem(position).getThumb());
+                i.putExtra("Drama_Name",adapter.getItem(position).getName());
+                i.putExtra("Drama_Rating",adapter.getItem(position).getRating());
+                i.putExtra("Drama_Created_at",adapter.getItem(position).getCreated_at());
+                i.putExtra("Drama_Total_views",adapter.getItem(position).getTotal_views());
                 startActivity(i);
                 finish();
 
             }
+
+
         });
+    }
+
+    private void setSearch_function() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String newText) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.resetData();
+                adapter.getFilter().filter(newText);
+                return true;
+            }
+        });
+
     }
 
     public Button.OnClickListener btnListener = new Button.OnClickListener() {
@@ -73,15 +98,15 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.search_btn:
-                    arrayList.clear();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new ReadJSON().execute(AppConfig.URL_GETDRAMAS); // listview資訊
-                        }
-                    });
-                    break;
+                //case R.id.search_btn:
+                //    arrayList.clear();
+                //    runOnUiThread(new Runnable() {
+                //        @Override
+                //        public void run() {
+                //            new ReadJSON().execute(AppConfig.URL_GETDRAMAS); // listview資訊
+                //        }
+                //    });
+                //    break;
             }
         }
     };
@@ -107,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray array = new JSONArray(data);
                 for (int i = 0; i < array.length(); i++) {
                     JSONObject jsonObject = array.getJSONObject(i);
-                    arrayList.add(new Drama(
+                    list.add(new Drama(
                             jsonObject.getString("drama_id"),
                             jsonObject.getString("name"),
                             jsonObject.getString("total_views")+"次",
@@ -120,9 +145,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            ListAdapter adapter = new ListAdapter(
-                    getApplicationContext(), R.layout.list_layout, arrayList
-            );
+            adapter = new ListAdapter(list, getApplicationContext());
             lv.setAdapter(adapter);
         }
     }

@@ -8,16 +8,8 @@
     >
 
 
-    <ImageButton
-        android:id="@+id/search_btn"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_alignEnd="@+id/search_edt"
-        android:layout_alignTop="@+id/search_edt"
-        android:background="@drawable/search_btn" />
-
-    <EditText
-        android:id="@+id/search_edt"
+    <SearchView
+        android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginRight="20dp"
@@ -28,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_below="@+id/search_edt">
+        android:layout_below="@+id/searchView">
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
