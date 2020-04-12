@@ -11,7 +11,9 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +69,7 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
             holder = (DramaHolder) v.getTag();
         }
             Drama drama = dramas.get(position);
-            Picasso.with(context).load(drama.getThumb()).into(holder.thubView);
+            Glide.with(context).load(drama.getThumb()).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.thubView);
             holder.nameView.setText(drama.getName());
             holder.ratingView.setText(drama.getRating());
             holder.createView.setText(drama.getCreated_at());
@@ -103,12 +105,12 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
                 constraint = constraint.toString().toLowerCase().trim();
                 FilterResults result = new FilterResults();
                 if(constraint != null && constraint.toString().length()>0){
+                    Search.search(constraint.toString());
                     List<Drama> filteredItem = new ArrayList<Drama>();
-                    for(Drama d : dramas){
-                        String title = d.getName().toString().toLowerCase().trim();
-                        if(title.contains(constraint)){
-                            filteredItem.add(d);
-                        }
+                    int i=0;
+                    while (AppConfig.indexList.get(i).getScore()>0) {
+                        filteredItem.add(AppConfig.indexList.get(i));
+                        i++;
                     }
                     result.count = filteredItem.size();
                     result.values = filteredItem;
@@ -127,7 +129,9 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
             protected void publishResults(CharSequence constraint, FilterResults results) {
 
                 if (results.count == 0) {
-                    notifyDataSetInvalidated();
+                     //notifyDataSetInvalidated();
+                    dramas = (List<Drama>)results.values;
+                    notifyDataSetChanged();
                 }
                 else {
                     dramas = (List<Drama>)results.values;
