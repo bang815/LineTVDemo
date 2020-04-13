@@ -16,16 +16,14 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -56,6 +54,18 @@ public class MainActivity extends AppCompatActivity implements NetworkChangedRec
         lv.setTextFilterEnabled(true);
         setSearch_function();
         preferences = getSharedPreferences("dramaInfo",MODE_PRIVATE);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                new ReadJSON().execute(AppConfig.URL_GETDRAMAS);
+            }
+        });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
         listener = new NetworkChangedReceiver.NetChangeListener() {
             @Override
             public void onChangeListener(Boolean result) {
@@ -73,21 +83,16 @@ public class MainActivity extends AppCompatActivity implements NetworkChangedRec
                     networkNotice_tv.setVisibility(View.VISIBLE);
                     networkNotice_tv.setBackgroundColor(Color.argb(255,173,0,0));
                     networkNotice_tv.setText(R.string.disconnect);
+                    if(!preferences.getString("searchState", "").equals("")) {
+                        String str = preferences.getString("searchState", "");
+                        if(adapter!=null){
+                            searchView.onActionViewExpanded();
+                            searchView.setQuery(str,false);
+                        }
+                    }
                 }
             }
         };
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                new ReadJSON().execute(AppConfig.URL_GETDRAMAS);
-            }
-        });
-
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -110,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements NetworkChangedRec
         networkChangedReceiver = new NetworkChangedReceiver();
         registerReceiver(networkChangedReceiver, intentFilter);
 
+
     }
 
     @Override
@@ -118,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements NetworkChangedRec
         if(networkChangedReceiver !=null){
             unregisterReceiver(networkChangedReceiver);
         }
+
     }
 
     public void onBackPressed() {
@@ -135,7 +142,6 @@ public class MainActivity extends AppCompatActivity implements NetworkChangedRec
             @Override
             public boolean onQueryTextChange(String newText) {
                 preferences.edit().putString("searchState",newText).commit();
-                adapter.resetData();
                 adapter.getFilter().filter(newText);
                 return true;
             }
@@ -151,15 +157,12 @@ public class MainActivity extends AppCompatActivity implements NetworkChangedRec
 
         @Override
         protected String doInBackground(String... params) {
-            return readURL(params[0]);
+                return readURL(params[0]);
+
         }
 
-        @Override
-        protected void onPostExecute(String content) {
-            handlejson(content);
-        }
+        private String readURL(String theUrl){
 
-        private String readURL(String theUrl) {
             StringBuffer content = new StringBuffer();
 
             try {
@@ -181,16 +184,24 @@ public class MainActivity extends AppCompatActivity implements NetworkChangedRec
                 connectionＦailed();
                 e.printStackTrace();
             }
+
             return content.toString();
-
-
         }
 
-        private void handlejson(String strJson){
+
+        @Override
+        protected void onPostExecute(String content) {
+            if(!content.equals("")){
+                handlejson(content);
+            }
+        }
+
+        private void handlejson(String strJson) {
             try {
                 JSONObject jObj = new JSONObject(strJson);
                 String data = jObj.getString("data");
                 JSONArray array = new JSONArray(data);
+                list.clear();
                 for (int i = 0; i < array.length(); i++) {
                     JSONObject jsonObject = array.getJSONObject(i);
                     list.add(new Drama(
@@ -199,9 +210,9 @@ public class MainActivity extends AppCompatActivity implements NetworkChangedRec
                             jsonObject.getString("total_views")+"次",
                             jsonObject.getString("created_at"),
                             jsonObject.getString("thumb"),
-                            jsonObject.getString("rating")+"分"
+                            jsonObject.getString("rating")+"分",
+                            (0)
                     ));
-
                 }
                 if(AppConfig.isConnect){
                     preferences.edit().putString("jsondata",jObj.toString()).commit();
@@ -210,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements NetworkChangedRec
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            adapter = new ListAdapter(list, getApplicationContext());
+            adapter = new ListAdapter(list, MainActivity.this);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -227,9 +238,8 @@ public class MainActivity extends AppCompatActivity implements NetworkChangedRec
 
         private void connectionＦailed(){
             String strJson = preferences.getString("jsondata","");
-
             if (strJson != null) {
-                handlejson(strJson);
+               handlejson(strJson);
             }
         }
     }

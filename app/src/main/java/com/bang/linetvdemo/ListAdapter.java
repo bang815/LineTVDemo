@@ -15,6 +15,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -22,6 +24,7 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
 
     private List<Drama> dramas;
     private List<Drama> origDramas;
+    private List<Drama> sortDramas;
     private Context context;
     private Filter dramaFilter;
 
@@ -30,6 +33,7 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
         this.dramas=dramas;
         this.context = context;
         this.origDramas = dramas;
+        this.sortDramas = new ArrayList<>(dramas);
 
     }
 
@@ -79,10 +83,6 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
 
     }
 
-    public void resetData() {
-        dramas = origDramas;
-    }
-
     private static class DramaHolder {
         public ImageView thubView;
         public TextView nameView;
@@ -104,12 +104,12 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
             protected FilterResults performFiltering(CharSequence constraint) {
                 constraint = constraint.toString().toLowerCase().trim();
                 FilterResults result = new FilterResults();
-                if(constraint != null && constraint.toString().length()>0){
-                    Search.search(constraint.toString());
+                if(constraint != null && constraint.toString().length()>0) {
+                    search(constraint.toString());
                     List<Drama> filteredItem = new ArrayList<Drama>();
-                    int i=0;
-                    while (AppConfig.indexList.get(i).getScore()>0) {
-                        filteredItem.add(AppConfig.indexList.get(i));
+                    int i = 0;
+                    while (sortDramas.get(i).getScore() > 0) {
+                        filteredItem.add(sortDramas.get(i));
                         i++;
                     }
                     result.count = filteredItem.size();
@@ -118,7 +118,6 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
                     synchronized (this){
                         result.values = origDramas;
                         result.count = origDramas.size();
-
                     }
                 }
 
@@ -129,7 +128,6 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
             protected void publishResults(CharSequence constraint, FilterResults results) {
 
                 if (results.count == 0) {
-                     //notifyDataSetInvalidated();
                     dramas = (List<Drama>)results.values;
                     notifyDataSetChanged();
                 }
@@ -138,5 +136,29 @@ public class ListAdapter extends ArrayAdapter<Drama> implements Filterable{
                     notifyDataSetChanged();
                 }
             }
+    }
+
+    public void search(String search){
+        int score;
+        for (Drama index : sortDramas){
+            score =0;
+            for(int i=0;i<search.length();i++){
+                if(index.getName().contains(String.valueOf(search.charAt(i)))){
+                    score++;
+                }
+            }
+            index.setScore(score);
+        }
+        Collections.sort(sortDramas, new Comparator<Drama>() {
+            @Override
+            public int compare(Drama d, Drama t1) {
+                return t1.getScore()-d.getScore();
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                return false;
+            }
+        });
     }
 }

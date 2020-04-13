@@ -4,16 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 
 public class DramaDetailsActivity extends AppCompatActivity {
     private TextView Name_tv,Rating_tv,Created_at_tv,Total_views_tv;
     private ImageView Thumb_img;
-    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +33,7 @@ public class DramaDetailsActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         Intent intent = this.getIntent();
-        Picasso.with(context).load(intent.getStringExtra("Drama_Thumb")).into(Thumb_img);
+        Glide.with(DramaDetailsActivity.this).load(intent.getStringExtra("Drama_Thumb")).diskCacheStrategy(DiskCacheStrategy.ALL).into(Thumb_img);
         Name_tv.setText(intent.getStringExtra("Drama_Name").trim());
         Rating_tv.setText(intent.getStringExtra("Drama_Rating").trim());
         Created_at_tv.setText(intent.getStringExtra("Drama_Created_at").trim());

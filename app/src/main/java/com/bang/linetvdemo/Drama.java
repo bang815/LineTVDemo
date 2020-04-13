@@ -7,14 +7,16 @@ public class Drama {
     private String created_at;
     private String thumb;
     private String rating;
+    private Integer score;
 
-    public Drama(String drama_id, String name, String total_views, String created_at, String thumb, String rating) {
+    public Drama(String drama_id, String name, String total_views, String created_at, String thumb, String rating, Integer score) {
         this.drama_id = drama_id;
         this.name = name;
         this.total_views = total_views;
         this.created_at = created_at;
         this.thumb = thumb;
         this.rating=rating;
+        this.score = score;
     }
 
     public String getDrama_id() {
@@ -63,5 +65,13 @@ public class Drama {
 
     public void setRating(String rating) {
         this.rating = rating;
+    }
+
+    public Integer getScore() {
+        return score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
     }
 }
